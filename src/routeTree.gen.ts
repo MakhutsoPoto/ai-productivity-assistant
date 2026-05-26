@@ -17,6 +17,8 @@ import { Route as AppTasksRouteImport } from './routes/app.tasks'
 import { Route as AppResearchRouteImport } from './routes/app.research'
 import { Route as AppNotesRouteImport } from './routes/app.notes'
 import { Route as AppEmailRouteImport } from './routes/app.email'
+import { Route as AppChatRouteImport } from './routes/app.chat'
+import { Route as AppChatThreadIdRouteImport } from './routes/app.chat.$threadId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -58,36 +60,52 @@ const AppEmailRoute = AppEmailRouteImport.update({
   path: '/email',
   getParentRoute: () => AppRoute,
 } as any)
+const AppChatRoute = AppChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChatThreadIdRoute = AppChatThreadIdRouteImport.update({
+  id: '/$threadId',
+  path: '/$threadId',
+  getParentRoute: () => AppChatRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/app/chat': typeof AppChatRouteWithChildren
   '/app/email': typeof AppEmailRoute
   '/app/notes': typeof AppNotesRoute
   '/app/research': typeof AppResearchRoute
   '/app/tasks': typeof AppTasksRoute
   '/app/': typeof AppIndexRoute
+  '/app/chat/$threadId': typeof AppChatThreadIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/app/chat': typeof AppChatRouteWithChildren
   '/app/email': typeof AppEmailRoute
   '/app/notes': typeof AppNotesRoute
   '/app/research': typeof AppResearchRoute
   '/app/tasks': typeof AppTasksRoute
   '/app': typeof AppIndexRoute
+  '/app/chat/$threadId': typeof AppChatThreadIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/app/chat': typeof AppChatRouteWithChildren
   '/app/email': typeof AppEmailRoute
   '/app/notes': typeof AppNotesRoute
   '/app/research': typeof AppResearchRoute
   '/app/tasks': typeof AppTasksRoute
   '/app/': typeof AppIndexRoute
+  '/app/chat/$threadId': typeof AppChatThreadIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -95,30 +113,36 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/auth'
+    | '/app/chat'
     | '/app/email'
     | '/app/notes'
     | '/app/research'
     | '/app/tasks'
     | '/app/'
+    | '/app/chat/$threadId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/app/chat'
     | '/app/email'
     | '/app/notes'
     | '/app/research'
     | '/app/tasks'
     | '/app'
+    | '/app/chat/$threadId'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/auth'
+    | '/app/chat'
     | '/app/email'
     | '/app/notes'
     | '/app/research'
     | '/app/tasks'
     | '/app/'
+    | '/app/chat/$threadId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -185,10 +209,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEmailRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/chat': {
+      id: '/app/chat'
+      path: '/chat'
+      fullPath: '/app/chat'
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/chat/$threadId': {
+      id: '/app/chat/$threadId'
+      path: '/$threadId'
+      fullPath: '/app/chat/$threadId'
+      preLoaderRoute: typeof AppChatThreadIdRouteImport
+      parentRoute: typeof AppChatRoute
+    }
   }
 }
 
+interface AppChatRouteChildren {
+  AppChatThreadIdRoute: typeof AppChatThreadIdRoute
+}
+
+const AppChatRouteChildren: AppChatRouteChildren = {
+  AppChatThreadIdRoute: AppChatThreadIdRoute,
+}
+
+const AppChatRouteWithChildren =
+  AppChatRoute._addFileChildren(AppChatRouteChildren)
+
 interface AppRouteChildren {
+  AppChatRoute: typeof AppChatRouteWithChildren
   AppEmailRoute: typeof AppEmailRoute
   AppNotesRoute: typeof AppNotesRoute
   AppResearchRoute: typeof AppResearchRoute
@@ -197,6 +247,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppChatRoute: AppChatRouteWithChildren,
   AppEmailRoute: AppEmailRoute,
   AppNotesRoute: AppNotesRoute,
   AppResearchRoute: AppResearchRoute,
