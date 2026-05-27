@@ -21,8 +21,17 @@ const features = [
 
 function Landing() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      {/* Decorative translucent lilac & mint blobs */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-32 -left-24 h-[28rem] w-[28rem] rounded-full bg-[#c9b8ff]/40 blur-3xl" />
+        <div className="absolute top-40 -right-32 h-[32rem] w-[32rem] rounded-full bg-[#b6e8d2]/45 blur-3xl" />
+        <div className="absolute bottom-[-10rem] left-1/3 h-[26rem] w-[26rem] rounded-full bg-[#d9c8ff]/35 blur-3xl" />
+        <div className="absolute top-1/2 left-[-6rem] h-72 w-72 rounded-full bg-[#a8e6c9]/35 blur-3xl" />
+      </div>
+
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+
         <div className="flex items-center gap-2 font-display text-lg font-semibold">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">M</span>
           Mothusi
