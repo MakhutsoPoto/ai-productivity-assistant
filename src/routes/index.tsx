@@ -23,23 +23,24 @@ function Landing() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
       {/* Decorative translucent lilac & mint blobs */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-32 -left-24 h-[28rem] w-[28rem] rounded-full bg-[#c9b8ff]/40 blur-3xl" />
-        <div className="absolute top-40 -right-32 h-[32rem] w-[32rem] rounded-full bg-[#b6e8d2]/45 blur-3xl" />
-        <div className="absolute bottom-[-10rem] left-1/3 h-[26rem] w-[26rem] rounded-full bg-[#d9c8ff]/35 blur-3xl" />
-        <div className="absolute top-1/2 left-[-6rem] h-72 w-72 rounded-full bg-[#a8e6c9]/35 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute -top-32 -left-24 h-[28rem] w-[28rem] rounded-full bg-[#c9b8ff]/70 blur-3xl" />
+        <div className="absolute top-40 -right-32 h-[32rem] w-[32rem] rounded-full bg-[#a8e6c9]/70 blur-3xl" />
+        <div className="absolute bottom-[-10rem] left-1/3 h-[26rem] w-[26rem] rounded-full bg-[#d9c8ff]/60 blur-3xl" />
+        <div className="absolute top-1/2 left-[-6rem] h-72 w-72 rounded-full bg-[#b6e8d2]/60 blur-3xl" />
+        <div className="absolute bottom-20 right-10 h-80 w-80 rounded-full bg-[#cdb8ff]/50 blur-3xl" />
       </div>
 
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+      <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
 
         <div className="flex items-center gap-2 font-display text-lg font-semibold">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">M</span>
           Mothusi
         </div>
-        <Link to="/auth"><Button variant="outline">Sign in</Button></Link>
+        <Link to="/auth"><Button className="bg-[#d1d5db] text-white hover:bg-[#c4c8ce]">Sign in</Button></Link>
       </header>
 
-      <section className="mx-auto max-w-4xl px-6 pt-16 pb-12 text-center">
+      <section className="relative z-10 mx-auto max-w-4xl px-6 pt-16 pb-12 text-center">
         <div className="mb-5 inline-flex items-center gap-2 rounded-full border bg-accent/40 px-3 py-1 text-xs">
           <Sparkles className="h-3.5 w-3.5" /> AI Workplace Productivity Assistant
         </div>
@@ -50,12 +51,12 @@ function Landing() {
           Generate emails, summarize meetings, plan tasks and research topics — all in one calm, professional workspace.
         </p>
         <div className="mt-8 flex justify-center gap-3">
-          <Link to="/auth"><Button size="lg">Get started free</Button></Link>
-          <a href="#features"><Button size="lg" variant="outline">See features</Button></a>
+          <Link to="/auth"><Button size="lg" className="bg-[#d1d5db] text-white hover:bg-[#c4c8ce]">Get started free</Button></Link>
+          <a href="#features"><Button size="lg" className="bg-[#d1d5db] text-white hover:bg-[#c4c8ce]">See features</Button></a>
         </div>
       </section>
 
-      <section id="features" className="mx-auto max-w-6xl px-6 pb-24">
+      <section id="features" className="relative z-10 mx-auto max-w-6xl px-6 pb-24">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f) => (
             <div key={f.title} className="rounded-2xl border bg-card p-6 transition hover:shadow-sm">
