@@ -9,7 +9,7 @@ It is meant to intergrate functionalities meant to replace individual work tools
 - Research assistance
 - Chatbot interaction
 
-##AI functionality
+## AI functionality
   The application uses the Google Gemini API to power:
 - Context-aware email generation
 - Structured meeting summaries (key points, action items)
