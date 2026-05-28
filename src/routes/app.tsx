@@ -2,6 +2,8 @@ import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/app")({
@@ -25,6 +27,11 @@ function AppLayout() {
     return () => { mounted = false; subscription.unsubscribe(); };
   }, [navigate]);
 
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    navigate({ to: "/" });
+  };
+
   if (!ready) {
     return <div className="grid min-h-screen place-items-center text-sm text-muted-foreground">Loading workspace…</div>;
   }
@@ -41,10 +48,18 @@ function AppLayout() {
               AI content may require human review.
             </div>
           </header>
-          <main className="flex-1 overflow-auto p-6">
+          <main className="flex-1 overflow-auto p-6 pb-28">
             <Outlet />
           </main>
         </div>
+        {/* Floating sign-out: bottom-right, 1.5x larger */}
+        <Button
+          onClick={signOut}
+          className="fixed bottom-6 right-6 z-50 h-14 gap-2 rounded-full bg-[#4b5563] px-7 text-base text-white shadow-lg hover:bg-[#374151]"
+        >
+          <LogOut className="h-5 w-5" />
+          Sign out
+        </Button>
       </div>
     </SidebarProvider>
   );
