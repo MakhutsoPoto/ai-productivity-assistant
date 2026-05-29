@@ -40,7 +40,23 @@ function AuthPage() {
     e.preventDefault(); setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) toast.error(error.message);
+    if (error) {
+      const notConfirmed = /confirm/i.test(error.message) || /not confirmed/i.test(error.message);
+      if (notConfirmed) {
+        toast.error("Email not confirmed yet.", {
+          action: {
+            label: "Resend link",
+            onClick: async () => {
+              const { error: rErr } = await supabase.auth.resend({ type: "signup", email });
+              if (rErr) toast.error(rErr.message);
+              else toast.success("Confirmation email resent.");
+            },
+          },
+        });
+      } else {
+        toast.error(error.message);
+      }
+    }
   };
 
   const signUp = async (e: React.FormEvent) => {
