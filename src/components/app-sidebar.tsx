@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Mail, FileText, ListChecks, Search, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Mail, FileText, ListChecks, Search, MessageSquare, CalendarClock } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader,
@@ -9,6 +9,7 @@ const items = [
   { title: "Overview", url: "/app", icon: LayoutDashboard, exact: true },
   { title: "Email Generator", url: "/app/email", icon: Mail },
   { title: "Meeting Notes", url: "/app/notes", icon: FileText },
+  { title: "Scheduled Meetings", url: "/app/meetings", icon: CalendarClock },
   { title: "Task Planner", url: "/app/tasks", icon: ListChecks },
   { title: "Research", url: "/app/research", icon: Search },
   { title: "Chat with Mothusi", url: "/app/chat", icon: MessageSquare },
