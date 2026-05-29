@@ -170,6 +170,10 @@ export const sendChatMessage = createServerFn({ method: "POST" })
       .from("chat_threads").select("id,title,user_id").eq("id", data.threadId).single();
     if (!thread || thread.user_id !== userId) throw new Error("Thread not found");
 
+    const { data: profile } = await supabase
+      .from("profiles").select("preferred_name,display_name").eq("id", userId).single();
+    const friendName = profile?.preferred_name?.trim() || profile?.display_name?.trim() || "friend";
+
     const { data: history } = await supabase
       .from("chat_messages").select("role,content")
       .eq("thread_id", data.threadId).order("created_at", { ascending: true }).limit(50);
@@ -179,9 +183,11 @@ export const sendChatMessage = createServerFn({ method: "POST" })
     });
 
     const model = getGatewayModel();
-    const sys = `You are Mothusi, a professional AI workplace productivity assistant.
+    const isFirstReply = !history || history.length === 0;
+    const sys = `You are Mothusi, a warm and professional AI workplace productivity assistant.
 You help with emails, meeting notes, task planning, and research.
-Be concise, structured, and warm. Use Markdown. Always remind the user when significant decisions or sensitive content may need human review.`;
+The user's preferred name is "${friendName}". ${isFirstReply ? `Begin this very first reply with "Hey ${friendName}," and then ask "What's on your mind?" before helping further if their message is just a greeting.` : `Use their name occasionally and naturally — not every message.`}
+Be concise, structured, and warm. Use Markdown. Remind the user when significant decisions or sensitive content may need human review.`;
     const messages = [
       ...(history ?? []).map((m) => ({ role: m.role as "user"|"assistant", content: m.content })),
       { role: "user" as const, content: data.message },
