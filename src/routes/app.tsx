@@ -14,6 +14,7 @@ export const Route = createFileRoute("/app")({
 function AppLayout() {
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
+  useMeetingReminders();
 
   useEffect(() => {
     let mounted = true;
