@@ -18,11 +18,11 @@ It is meant to intergrate functionalities meant to replace individual work tools
 - Conversational chatbot interaction
  Each feature uses tailored prompts to produce structured and relevant outputs
 
-##  Technologies Used
+##  Technologies and Tools Used
 - Lovable.AI
-- Netlify
 - Google Gemini API
 - SupaBase
+- Github
 
 
 ## Learning outcomes
