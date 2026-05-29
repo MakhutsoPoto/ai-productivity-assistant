@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Copy, Mail, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Disclaimer } from "@/components/feature-shell";
+import { PromptChips } from "@/components/prompt-chips";
+import { emailExamples } from "@/lib/example-prompts";
 
 export const Route = createFileRoute("/app/email")({ component: EmailPage });
 
@@ -60,7 +62,13 @@ function EmailPage() {
             <div><Label>Audience</Label><Input value={audience} onChange={(e)=>setAudience(e.target.value)} placeholder="e.g. Senior client, engineering manager" /></div>
           </div>
           <div><Label>Extra context (optional)</Label><Textarea rows={3} value={context} onChange={(e)=>setContext(e.target.value)} placeholder="Constraints, key facts, names…" /></div>
-          <Button disabled={mut.isPending || !topic || !audience} onClick={() => mut.mutate()}>
+          <PromptChips
+            examples={emailExamples}
+            labelOf={(e) => e.label}
+            onPick={(e) => { setTopic(e.topic); setTone(e.tone); setAudience(e.audience); }}
+            onCustom={() => { setTopic(""); setAudience(""); setContext(""); }}
+          />
+          <Button disabled={mut.isPending || !topic || !audience} onClick={() => mut.mutate()} className="bg-[#4b5563] text-white hover:bg-[#374151]">
             <Sparkles className="h-4 w-4" /> {mut.isPending ? "Generating…" : "Generate email"}
           </Button>
           <Disclaimer />

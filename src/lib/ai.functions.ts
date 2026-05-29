@@ -170,6 +170,10 @@ export const sendChatMessage = createServerFn({ method: "POST" })
       .from("chat_threads").select("id,title,user_id").eq("id", data.threadId).single();
     if (!thread || thread.user_id !== userId) throw new Error("Thread not found");
 
+    const { data: profile } = await supabase
+      .from("profiles").select("preferred_name,display_name").eq("id", userId).single();
+    const friendName = profile?.preferred_name?.trim() || profile?.display_name?.trim() || "friend";
+
     const { data: history } = await supabase
       .from("chat_messages").select("role,content")
       .eq("thread_id", data.threadId).order("created_at", { ascending: true }).limit(50);
@@ -179,9 +183,11 @@ export const sendChatMessage = createServerFn({ method: "POST" })
     });
 
     const model = getGatewayModel();
-    const sys = `You are Mothusi, a professional AI workplace productivity assistant.
+    const isFirstReply = !history || history.length === 0;
+    const sys = `You are Mothusi, a warm and professional AI workplace productivity assistant.
 You help with emails, meeting notes, task planning, and research.
-Be concise, structured, and warm. Use Markdown. Always remind the user when significant decisions or sensitive content may need human review.`;
+The user's preferred name is "${friendName}". ${isFirstReply ? `Begin this very first reply with "Hey ${friendName}," and then ask "What's on your mind?" before helping further if their message is just a greeting.` : `Use their name occasionally and naturally — not every message.`}
+Be concise, structured, and warm. Use Markdown. Remind the user when significant decisions or sensitive content may need human review.`;
     const messages = [
       ...(history ?? []).map((m) => ({ role: m.role as "user"|"assistant", content: m.content })),
       { role: "user" as const, content: data.message },
@@ -201,6 +207,83 @@ Be concise, structured, and warm. Use Markdown. Always remind the user when sign
     }
     return { reply: text, disclaimer: DISCLAIMER };
   });
+
+// ----- Preferred name (Mothusi onboarding) -----
+const NameInput = z.object({ name: z.string().min(1).max(60) });
+export const setPreferredName = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => NameInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await supabase.from("profiles").upsert({ id: userId, preferred_name: data.name.trim() }, { onConflict: "id" });
+    return { ok: true, name: data.name.trim() };
+  });
+
+export const getPreferredName = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data } = await supabase.from("profiles").select("preferred_name,display_name").eq("id", userId).single();
+    return {
+      preferredName: data?.preferred_name ?? null,
+      displayName: data?.display_name ?? null,
+    };
+  });
+
+// ----- Audio transcription + summarization (meetings) -----
+const TranscribeInput = z.object({
+  audioBase64: z.string().min(10),
+  mimeType: z.string().min(3).max(100),
+  title: z.string().max(200).optional(),
+});
+
+export const transcribeAndSummarizeAudio = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => TranscribeInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const model = getGatewayModel();
+
+    const transcribeRes = await generateText({
+      model,
+      system: "You are an expert audio transcriber. Output ONLY the verbatim transcript text — no commentary, no timestamps, no speaker labels unless distinct voices are clearly present.",
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: "Transcribe this meeting audio." },
+            { type: "file", data: data.audioBase64, mediaType: data.mimeType },
+          ],
+        },
+      ],
+    });
+    const transcript = transcribeRes.text.trim();
+
+    const summarySys = `You are Mothusi, an expert meeting summarizer.
+Produce a clean Markdown summary with these sections, in order:
+## Summary
+A 2-3 sentence overview.
+## Key Points
+- Bullet list of decisions and topics.
+## Action Items
+- [Owner if known] Action — Deadline (if mentioned)
+## Deadlines
+- Date — Item (only if explicit)
+Be precise. Do not invent owners or dates. Skip a section if nothing fits.`;
+    const sumRes = await generateText({ model, system: summarySys, prompt: transcript });
+    const summary = sumRes.text;
+
+    const { data: saved } = await context.supabase.from("meeting_summaries").insert({
+      user_id: context.userId,
+      title: data.title || "Untitled audio meeting",
+      raw_notes: "(transcribed from audio)",
+      transcript,
+      summary,
+    }).select("id").single();
+
+    return { id: saved?.id, transcript, summary, disclaimer: DISCLAIMER };
+  });
+
+
 
 function safeJson(text: string): any {
   try { return JSON.parse(text); } catch {}

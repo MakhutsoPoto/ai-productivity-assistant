@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Disclaimer } from "@/components/feature-shell";
+import { PromptChips } from "@/components/prompt-chips";
+import { researchExamples } from "@/lib/example-prompts";
 
 export const Route = createFileRoute("/app/research")({ component: ResearchPage });
 
@@ -39,7 +41,15 @@ function ResearchPage() {
         <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
           <div><Label>Topic</Label><Input value={topic} onChange={(e)=>setTopic(e.target.value)} placeholder="e.g. Vector databases for SaaS search" /></div>
           <div><Label>Focus (optional)</Label><Input value={focus} onChange={(e)=>setFocus(e.target.value)} placeholder="e.g. Cost vs. latency tradeoffs" /></div>
-          <div className="flex items-end"><Button disabled={mut.isPending || !topic} onClick={()=>mut.mutate()}><Sparkles className="h-4 w-4" /> {mut.isPending ? "Researching…" : "Research"}</Button></div>
+          <div className="flex items-end"><Button disabled={mut.isPending || !topic} onClick={()=>mut.mutate()} className="bg-[#4b5563] text-white hover:bg-[#374151]"><Sparkles className="h-4 w-4" /> {mut.isPending ? "Researching…" : "Research"}</Button></div>
+        </div>
+        <div className="mt-3">
+          <PromptChips
+            examples={researchExamples}
+            labelOf={(e) => e.topic.length > 28 ? e.topic.slice(0, 28) + "…" : e.topic}
+            onPick={(e) => { setTopic(e.topic); setFocus(e.focus ?? ""); }}
+            onCustom={() => { setTopic(""); setFocus(""); }}
+          />
         </div>
         <Disclaimer />
       </div>

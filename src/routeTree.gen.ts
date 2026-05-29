@@ -17,6 +17,7 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppTasksRouteImport } from './routes/app.tasks'
 import { Route as AppResearchRouteImport } from './routes/app.research'
 import { Route as AppNotesRouteImport } from './routes/app.notes'
+import { Route as AppMeetingsRouteImport } from './routes/app.meetings'
 import { Route as AppEmailRouteImport } from './routes/app.email'
 import { Route as AppChatRouteImport } from './routes/app.chat'
 import { Route as AppChatThreadIdRouteImport } from './routes/app.chat.$threadId'
@@ -61,6 +62,11 @@ const AppNotesRoute = AppNotesRouteImport.update({
   path: '/notes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMeetingsRoute = AppMeetingsRouteImport.update({
+  id: '/meetings',
+  path: '/meetings',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppEmailRoute = AppEmailRouteImport.update({
   id: '/email',
   path: '/email',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/app/chat': typeof AppChatRouteWithChildren
   '/app/email': typeof AppEmailRoute
+  '/app/meetings': typeof AppMeetingsRoute
   '/app/notes': typeof AppNotesRoute
   '/app/research': typeof AppResearchRoute
   '/app/tasks': typeof AppTasksRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/app/chat': typeof AppChatRouteWithChildren
   '/app/email': typeof AppEmailRoute
+  '/app/meetings': typeof AppMeetingsRoute
   '/app/notes': typeof AppNotesRoute
   '/app/research': typeof AppResearchRoute
   '/app/tasks': typeof AppTasksRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/app/chat': typeof AppChatRouteWithChildren
   '/app/email': typeof AppEmailRoute
+  '/app/meetings': typeof AppMeetingsRoute
   '/app/notes': typeof AppNotesRoute
   '/app/research': typeof AppResearchRoute
   '/app/tasks': typeof AppTasksRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/app/chat'
     | '/app/email'
+    | '/app/meetings'
     | '/app/notes'
     | '/app/research'
     | '/app/tasks'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/app/chat'
     | '/app/email'
+    | '/app/meetings'
     | '/app/notes'
     | '/app/research'
     | '/app/tasks'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/app/chat'
     | '/app/email'
+    | '/app/meetings'
     | '/app/notes'
     | '/app/research'
     | '/app/tasks'
@@ -222,6 +234,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNotesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/meetings': {
+      id: '/app/meetings'
+      path: '/meetings'
+      fullPath: '/app/meetings'
+      preLoaderRoute: typeof AppMeetingsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/email': {
       id: '/app/email'
       path: '/email'
@@ -260,6 +279,7 @@ const AppChatRouteWithChildren =
 interface AppRouteChildren {
   AppChatRoute: typeof AppChatRouteWithChildren
   AppEmailRoute: typeof AppEmailRoute
+  AppMeetingsRoute: typeof AppMeetingsRoute
   AppNotesRoute: typeof AppNotesRoute
   AppResearchRoute: typeof AppResearchRoute
   AppTasksRoute: typeof AppTasksRoute
@@ -269,6 +289,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppChatRoute: AppChatRouteWithChildren,
   AppEmailRoute: AppEmailRoute,
+  AppMeetingsRoute: AppMeetingsRoute,
   AppNotesRoute: AppNotesRoute,
   AppResearchRoute: AppResearchRoute,
   AppTasksRoute: AppTasksRoute,
@@ -286,13 +307,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

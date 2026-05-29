@@ -1,14 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Mail, FileText, ListChecks, Search, MessageSquare, ArrowRight } from "lucide-react";
+import { Mail, FileText, ListChecks, Search, MessageSquare, CalendarClock, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/app/")({ component: Overview });
 
 const cards = [
-  { url: "/app/email", icon: Mail, title: "Smart Email Generator", desc: "Draft tone-tuned emails in seconds." },
-  { url: "/app/notes", icon: FileText, title: "Meeting Notes Summarizer", desc: "Key points, actions, deadlines." },
-  { url: "/app/tasks", icon: ListChecks, title: "AI Task Planner", desc: "Plan and prioritize your week." },
+  { url: "/app/email", icon: Mail, title: "Smart Emails", desc: "Draft tone-tuned emails in seconds." },
+  { url: "/app/notes", icon: FileText, title: "Smart Meeting Notes", desc: "Paste notes or upload audio — get a summary." },
+  { url: "/app/meetings", icon: CalendarClock, title: "Scheduled Meetings", desc: "Get an in-app reminder 30 min before each meeting." },
+  { url: "/app/tasks", icon: ListChecks, title: "Task Planner", desc: "Plan and prioritize your week." },
   { url: "/app/research", icon: Search, title: "Research Assistant", desc: "Insights and synthesis on any topic." },
   { url: "/app/chat", icon: MessageSquare, title: "Chat with Mothusi", desc: "Conversational AI workspace partner." },
 ];
