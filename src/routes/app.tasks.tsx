@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { ListChecks, Sparkles, Check } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Disclaimer } from "@/components/feature-shell";
+import { PromptChips } from "@/components/prompt-chips";
+import { tasksExamples } from "@/lib/example-prompts";
 
 export const Route = createFileRoute("/app/tasks")({ component: TasksPage });
 
@@ -53,7 +55,15 @@ function TasksPage() {
         <div className="grid gap-3 sm:grid-cols-[1fr_140px_auto]">
           <div><Label>Goal</Label><Textarea rows={2} value={goal} onChange={(e)=>setGoal(e.target.value)} placeholder="e.g. Launch onboarding email sequence by next Friday" /></div>
           <div><Label>Horizon (days)</Label><Input type="number" min={1} max={30} value={days} onChange={(e)=>setDays(parseInt(e.target.value) || 7)} /></div>
-          <div className="flex items-end"><Button disabled={mut.isPending || !goal} onClick={()=>mut.mutate()}><Sparkles className="h-4 w-4" /> {mut.isPending ? "Planning…" : "Plan tasks"}</Button></div>
+          <div className="flex items-end"><Button disabled={mut.isPending || !goal} onClick={()=>mut.mutate()} className="bg-[#4b5563] text-white hover:bg-[#374151]"><Sparkles className="h-4 w-4" /> {mut.isPending ? "Planning…" : "Plan tasks"}</Button></div>
+        </div>
+        <div className="mt-3">
+          <PromptChips
+            examples={tasksExamples}
+            labelOf={(s) => s.length > 30 ? s.slice(0, 30) + "…" : s}
+            onPick={(s) => setGoal(s)}
+            onCustom={() => setGoal("")}
+          />
         </div>
         <Disclaimer />
       </div>
