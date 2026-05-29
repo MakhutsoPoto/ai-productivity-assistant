@@ -1,35 +1,44 @@
-## Landing page redesign
+# Implementation Plan
 
-Scope: `src/routes/index.tsx` only.
+Build in 4 phases. Stop between phases for review.
 
-### Button styling
-- Replace light grey (`#d1d5db`) with a darker grey (`#6b7280`), hover `#4b5563`, white text.
-- Apply to: "Sign in", "GET STARTED" (renamed), "SEE FEATURES" (uppercased).
+## Phase 1 — Fix auth verification issues
 
-### CTA copy
-- "Get started free" → **GET STARTED** (all caps).
-- "See features" → **SEE FEATURES** (all caps).
+Audit and fix the current signup/password-reset flow:
+- Ensure email confirmation is required (no auto-confirm) and the signup flow shows a clear "check your email" state instead of silently failing.
+- Fix `reset-password.tsx` so it handles the Supabase recovery link correctly: detect the `PASSWORD_RECOVERY` auth event / hash tokens on mount, only allow setting a new password when a recovery session exists, and show a clear error if the link expired.
+- Add an "email not confirmed" error path on sign in with a "resend confirmation" action.
+- Verify the redirect URL used by `resetPasswordForEmail` points to `/reset-password` on the current origin.
 
-### Feature cards → app-icon tiles
-Convert the 3-column rectangular feature cards into a grid of square tiles that look like phone home-screen apps:
-- Square aspect (`aspect-square`), rounded-2xl, dark grey background (`#4b5563` / `#374151`), white icon centered, subtle hover lift/scale.
-- Icon is the interactive surface (button/link).
-- Feature **name shown underneath the tile** (always visible, centered, dark text).
-- **Description hidden by default**, revealed on hover/focus of the tile (tooltip-style overlay or fade-in caption below the name).
+## Phase 2 — AI features polish (Gemini already wired)
 
-### Rename features
-- "Smart Email Generator" → **Smart Emails**
-- "Meeting Notes Summarizer" → **Smart Meeting Notes**
-- "AI Task Planner" → **Task Planner**
-- (Keep "Research Assistant" and "Chat with Mothusi" unchanged.)
+The Gemini gateway and 5 server functions (email, notes, tasks, research, chat) already exist via Lovable AI Gateway using `google/gemini-3-flash-preview`. Add the UX layer the user asked for:
+- **Example prompt library**: each feature page (email, notes, tasks, research, chat) gets 3–5 curated example prompts shown as clickable chips that fill the form.
+- **Customize prompts**: clicking a chip loads it into the input where the user can edit before sending.
+- **Custom prompt option**: a "Write your own" chip that clears the form for free-form input.
+- **Mothusi name onboarding**: first time a user opens chat, Mothusi asks "Hey Friend, Mothusi here, what name do you prefer?" Store the chosen name in `profiles.display_name` (or a new `preferred_name` column). All future chat replies start with "Hey [name]". Implemented by injecting the name into the chat system prompt and adding a one-time onboarding message when the user has no chat threads yet.
 
-### Text color fix
-- Feature descriptions (currently `text-muted-foreground` / grey) → black (`text-foreground` / `text-black`) so the revealed description is legible.
+## Phase 3 — Meetings upgrade
 
-### Out of scope
-- Sidebar, dashboard, other routes, backend, button component variants.
+Extend the notes page into a full meetings workflow:
+- **Audio upload → transcribe → summarize**: add a file upload (mp3/wav/m4a/webm) to `/app/notes`. Store the file in a new private Supabase storage bucket `meeting-audio`. A new server function transcribes the audio via Gemini (multimodal audio input on `gemini-2.5-flash`), then feeds the transcript into the existing `summarizeMeeting`. Show transcript + summary side by side.
+- **TTS playback of summary**: a "Listen" button on each summary uses the browser's `SpeechSynthesis` API to read it aloud (no extra cost, no backend). Play/pause/stop controls.
+- **Scheduled meetings + 30-min reminders**: new `scheduled_meetings` table (title, starts_at, notes). A new `/app/meetings` page lists upcoming meetings with create/edit/delete. In-app toast reminders fire 30 minutes before `starts_at` using a polling hook on the authenticated layout (checks every 60s, dedupes via localStorage so each meeting fires once per browser).
 
-### Technical notes
-- Edit only `src/routes/index.tsx`.
-- Use Tailwind utilities; hover reveal via `group` + `group-hover:opacity-100` on an absolutely-positioned caption, or a tooltip below the name.
-- Keep existing translucent lilac/mint blob background.
+## Phase 4 — Wire-up + verify
+
+- Add navigation links in the sidebar for the new meetings page.
+- Smoke-test each feature end-to-end in the preview.
+- Confirm RLS on the new tables/bucket scopes everything to `auth.uid()`.
+
+## Technical notes
+
+- **DB changes** (Phase 2–3): add `preferred_name text` to `profiles`; create `scheduled_meetings` table with RLS; create `meeting-audio` storage bucket with per-user folder RLS; optionally add `transcript text` column to `meeting_summaries`.
+- **Server functions**: new `transcribeAudio` server fn using Gemini multimodal; reuse existing `summarizeMeeting`. All under `requireSupabaseAuth`.
+- **Reminders**: client-side polling hook in `_authenticated` layout — no cron, no edge function (matches user's "in-app toast only" choice).
+- **No new secrets needed** — `LOVABLE_API_KEY` already covers Gemini calls including audio transcription.
+
+## Open questions
+
+1. For the **preferred name**, should it overwrite `profiles.display_name`, or live in a separate `preferred_name` column so the original display name is preserved?
+2. For **audio transcription**, max file size — cap at 25 MB (≈30 min audio) to keep gateway calls fast?
